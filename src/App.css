@@ -1,0 +1,20 @@
+/* .allNote-del{
+  position: fixed;
+  bottom: 28px;
+  right: 20px;
+} */
+.app-flex{
+  display: flex;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+  .slide-app{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+  .app-flex{
+    display:  block;
+  }
+}

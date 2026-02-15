@@ -1,0 +1,326 @@
+.note-title {
+  outline: none;
+  font-size: 1.5rem;
+  font-weight: 600;
+  overflow: hidden;
+}
+.dropdown-toggle::after {
+  content: none !important;
+}
+/* When user Add new Note, then show this class */
+.note {
+  padding: 25px;
+  width: 330px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* gap: 7px; */
+  border-radius: 15px;
+  background-color: blueviolet;
+}
+.note_text {
+  flex: 1;
+  resize: none;
+  background-color: transparent;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  outline: none;
+  letter-spacing: 0.5px;
+  /* font-family: 'Montserrat'; */
+  font-family: Verdana, Geneva, sans-serif;
+  overflow-y: auto;
+}
+
+.truncated-text {
+  /* flex: 1; */
+  height: 100%;
+  max-height: 15em;
+  letter-spacing: 0.7px;
+  line-height: 1.3rem;
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-wrap; /* Preserve line breaks */
+}
+
+.single-line {
+  white-space: nowrap; /* Prevents text from wrapping */
+  overflow: hidden; /* Hides overflowing text */
+  text-overflow: ellipsis; /* Shows three dots (...) */
+  display: block; /* Ensures it takes full width */
+  max-width: 100%; /* Prevents overflow */
+}
+
+.time {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.704);
+}
+
+.note {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.5s ease-in-out;
+}
+
+/* Animation Class */
+.note-animate {
+  opacity: 0;
+  transform: scale(0.5);
+  animation: scaleIn 0.5s forwards ease-in-out;
+}
+
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Zoom-out animation for deletion */
+.note-zoom-out {
+  animation: zoomOut 0.3s ease-in-out;
+}
+
+@keyframes zoomOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.note-footer i {
+  cursor: pointer;
+  color: rgb(255, 69, 69);
+  font-size: 18px;
+  transition: 300ms;
+}
+
+/* When user Note Edit at time Show class */
+.note-fullscreen {
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  position: relative;
+  width: 50%;
+  height: 80%;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.save-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.save-button:hover {
+  background-color: #45a049;
+}
+/* this class is in Notecontainer.js */
+.closee {
+  position: absolute;
+  top: 15%;
+  right: 27%;
+  z-index: 9999;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+  .note {
+    width: 100px;
+    height: 150px;
+    padding: 10px;
+  }
+  .note-title {
+    outline: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    overflow: hidden;
+  }
+  .note-fullscreen {
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    position: relative;
+    width: 100%;
+    height: 85%;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .closee {
+    position: absolute;
+    top: 13%;
+    right: 9%;
+    z-index: 9999;
+  }
+  .truncated-text {
+    max-height: 12em; /* Adjust height for smaller screens */
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.695);
+    -webkit-line-clamp: 8;
+  }
+  .note-footer i {
+    cursor: pointer;
+    color: rgb(255, 69, 69);
+    font-size: 13px;
+    transition: 300ms;
+  }
+  .time {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.704);
+  }
+  /* .truncated-text {
+    max-height: 13em;
+    font-size: 0.8rem;
+    -webkit-line-clamp: 8;
+  } */
+
+  .note_text {
+    font-size: 0.85rem;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .note {
+    width: 332px;
+    height: 332px;
+  }
+  .note-fullscreen {
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    position: relative;
+    width: 90%;
+    height: 80%;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .closee {
+    position: absolute;
+    /* top: 24%;
+    right: 14%; */
+    top: 15%;
+    right: 9%;
+    z-index: 9999;
+  }
+  .truncated-text {
+    max-height: 14em; /* Adjust height for smaller screens */
+    font-size: 0.85rem;
+    -webkit-line-clamp: 9;
+  }
+
+  .note_text {
+    font-size: 0.9rem;
+  }
+}
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (min-width: 992px) {
+  .note {
+    width: 294px;
+    height: 294px;
+  }
+  .note-fullscreen {
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    position: relative;
+    width: 90%;
+    height: 80%;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .closee {
+    position: absolute;
+    top: 14%;
+    right: 9%;
+    z-index: 9999;
+  }
+  .truncated-text {
+    max-height: 13em;
+    font-size: 0.8rem;
+    -webkit-line-clamp: 8;
+  }
+}
+@media only screen and (min-width: 1200px) {
+  .note {
+    width: 312px;
+    height: 312px;
+  }
+  .note-fullscreen {
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    position: relative;
+    width: 90%;
+    height: 80%;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .closee {
+    position: absolute;
+    top: 13%;
+    right: 8%;
+    z-index: 9999;
+  }
+  .truncated-text {
+    max-height: 15em;
+    font-size: 0.8rem;
+    -webkit-line-clamp: 9;
+  }
+}
+@media only screen and (min-width: 1500px) {
+  .note {
+    width: 328px;
+    height: 328px;
+  }
+  .note-fullscreen {
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    position: relative;
+    width: 80%;
+    height: 80%;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .closee {
+    position: absolute;
+    top: 14%;
+    right: 12.2%;
+    z-index: 9999;
+  }
+  .truncated-text {
+    max-height: 16.5em;
+    font-size: 0.8rem;
+    -webkit-line-clamp: 10;
+  }
+}
