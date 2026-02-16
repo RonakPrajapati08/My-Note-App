@@ -1,13 +1,16 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import "./index.css";
+import { registerSW } from "virtual:pwa-register";
+import { BrowserRouter } from "react-router-dom"; // ✅ ADD THIS
 import App from "./App.jsx";
 
+registerSW({ immediate: true });
+
 createRoot(document.getElementById("root")).render(
-  <BrowserRouter basename="/My-Note-App">
-    <StrictMode>
+  <StrictMode>
+    <BrowserRouter basename="/My-Note-App">
       <App />
-    </StrictMode>
-  </BrowserRouter>,
+    </BrowserRouter>
+  </StrictMode>,
 );

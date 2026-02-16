@@ -1,6 +1,6 @@
 {
   "name": "note-app",
-  "homepage": "https://RonakPrajapati08.github.io/My-Note-App",
+  "homepage": "https://RonakPrajapati08.github.io/My-Note-App/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -21,6 +21,7 @@
     "canvas-confetti": "^1.9.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.0",
     "vite-plugin-pwa": "^1.2.0"
   },
   "devDependencies": {

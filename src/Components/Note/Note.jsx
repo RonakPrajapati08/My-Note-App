@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { TrashIcon } from '@heroicons/react/24/solid';
+import { TrashIcon } from "@heroicons/react/24/solid";
 import {
   faTrash, // delete
   faEdit, // edit
@@ -68,8 +68,7 @@ function Note({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title..."
-            className="bg-transparent outline-none
-  font-bold
+            className="bg-transparent outline-none font-bold
   text-sm sm:text-base md:text-lg lg:text-xl
   text-gray-700"
           />
@@ -86,13 +85,13 @@ function Note({
           </div>
         ) : (
           <textarea
-            rows="8"
+            rows="7"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Write your note here..."
             className="resize-none bg-transparent outline-none 
-             text-gray-700 text-sm 
-             flex-1 overflow-y-auto"
+             text-gray-700 text-base 
+             flex-1 overflow-y-auto custom-scroll"
           />
         )}
       </div>
@@ -109,8 +108,8 @@ function Note({
 
         {/* Delete Note */}
         {!isFullScreen && (
-  <TrashIcon
-    className="
+          <TrashIcon
+            className="
       text-red-500 
       bg-white 
       rounded-full 
@@ -125,23 +124,26 @@ function Note({
       md:w-7 md:h-7 /* laptop */
       lg:w-7 lg:h-7 /* desktop */
     "
-    onClick={() => {
-      setDeleting(true);
-      setTimeout(() => deleteNote(note.id), 300);
-    }}
-  />
-)}
-      </div>
+            onClick={() => {
+              setDeleting(true);
+              setTimeout(() => deleteNote(note.id), 300);
+            }}
+          />
+        )}
 
-      {/* SAVE BUTTON (Fullscreen Only) */}
-      {isFullScreen && isEditing && (
-        <button
-          onClick={handleSave}
-          className="absolute bottom-5 right-5 bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-lg transition-transform transform hover:scale-110"
-        >
-          <FontAwesomeIcon icon={faFloppyDisk} className="text-white w-5 h-5" />
-        </button>
-      )}
+        {/* SAVE BUTTON (Fullscreen Only) */}
+        {isFullScreen && isEditing && (
+          <button
+            onClick={handleSave}
+            className=" bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg shadow-lg transition-transform transform hover:scale-110"
+          >
+            <FontAwesomeIcon
+              icon={faFloppyDisk}
+              className="text-white w-5 h-5"
+            />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
