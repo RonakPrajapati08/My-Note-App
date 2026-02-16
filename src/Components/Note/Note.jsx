@@ -46,7 +46,7 @@ function Note({
   ${
     isFullScreen
       ? "w-full h-full p-6 overflow-hidden"
-      : "aspect-[2/3] p-3 sm:aspect-auto sm:h-[300px] md:h-[320px] lg:h-[340px] sm:p-4"
+      : "h-[180px] sm:h-[260px] md:h-[300px] lg:h-[320px] p-3 sm:p-4"
   }
 `}
       style={{
@@ -56,13 +56,13 @@ function Note({
     >
       {/* TITLE + TEXT */}
       <div
-        className="flex flex-col gap-3 flex-1 cursor-pointer"
+        className="flex flex-col gap-2 flex-1 cursor-pointer"
         onClick={() => setSelectedNote(note)}
       >
         {!isEditing ? (
           <div
             className="font-bold
-  text-sm sm:text-base md:text-lg lg:text-xl
+  text-base sm:text-base md:text-lg lg:text-xl
   text-gray-700 truncate cursor-pointer"
           >
             {title}
@@ -73,15 +73,15 @@ function Note({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title..."
-            className="bg-transparent outline-none font-bold
-  text-sm sm:text-base md:text-lg lg:text-xl
+            className="bg-transparent outline-none font-bold 
+  text-[20px] text-base sm:text-base md:text-lg lg:text-xl
   text-gray-700"
           />
         )}
 
         {!isEditing ? (
           <div
-            className="text-[10px] leading-[1.1rem] sm:text-xs md:text-sm lg:text-[0.8rem] lg:leading-[1.7rem]
+            className="text-[12px] font-semibold leading-[1.1rem] sm:text-xs md:text-sm lg:text-[0.8rem] lg:leading-[1.7rem]
            text-gray-700 line-clamp-5 sm:line-clamp-[8] md:line-clamp-[10] lg:line-clamp-[8] 
            whitespace-pre-wrap cursor-pointer"
           >

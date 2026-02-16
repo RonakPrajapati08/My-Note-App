@@ -96,11 +96,11 @@ function NoteContainer() {
       const updatedNotes = prevNotes.map((note) =>
         note.id === id
           ? {
-              ...note,
-              title: newTitle,
-              text: newText,
-              time: new Date().toISOString(),
-            }
+            ...note,
+            title: newTitle,
+            text: newText,
+            time: new Date().toISOString(),
+          }
           : note,
       );
 
@@ -159,7 +159,7 @@ function NoteContainer() {
   };
 
   return (
-    <div className="w-full h-screen px-1 md:px-8 py-6 flex gap-2">
+    <div className="w-full min-h-screen px-1 md:px-8 py-6 flex gap-2">
       {/* Sidebar */}
       {!selectedNote && (
         <div className="flex flex-col md:w-10 w-0">
@@ -185,11 +185,10 @@ function NoteContainer() {
                 className={`
                       flex items-center gap-2 px-4 py-2 rounded-lg shadow 
                       transition transform duration-200
-                      ${
-                        notes.length === 0
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
-                          : "bg-red-500 hover:bg-red-600 text-white hover:scale-105"
-                      }
+                      ${notes.length === 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                    : "bg-red-500 hover:bg-red-600 text-white hover:scale-105"
+                  }
                     `}
               >
                 <FontAwesomeIcon icon={faTrash} className="w-5 h-5" />
@@ -219,11 +218,23 @@ function NoteContainer() {
           {/* Toast */}
           {showToast && (
             <div
-              className={` fixed top-6 right-6  bg-green-500 text-white  px-6 py-3  rounded-xl shadow-2xl  z-50 flex items-center gap-4 transform transition-all duration-500 animate-slideIn`}
+              className={`
+                      fixed 
+                      top-4 left-1 -translate-x-1/2
+                      sm:top-6 sm:right-6 sm:left-auto sm:translate-x-0
+                      w-[92%] sm:w-auto
+                      bg-green-500 text-white
+                      px-4 sm:px-6 py-3
+                      rounded-xl shadow-2xl
+                      z-50
+                      flex items-center justify-between gap-4
+                      transform transition-all duration-500 animate-slideIn
+                    `}
             >
-              <span className="text-sm font-medium">{toastMsg}</span>
+              <span className="text-sm sm:text-base font-medium">
+                {toastMsg}
+              </span>
 
-              {/* Close Button */}
               <button
                 onClick={() => setShowToast(false)}
                 className="text-white hover:text-gray-200 text-lg font-bold"
@@ -232,6 +243,7 @@ function NoteContainer() {
               </button>
             </div>
           )}
+
           {/* /* Delete All Confirmation Modal */}
 
           {showDeleteConfirm && (
@@ -303,13 +315,12 @@ function NoteContainer() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2">
               {filteredNotes.map((note) => (
                 <div
                   key={note.id}
-                  className={`p-1 ${
-                    recentlyEditedId === note.id ? "animate-pulse" : ""
-                  }`}
+                  className={`p-1 ${recentlyEditedId === note.id ? "animate-pulse" : ""
+                    }`}
                 >
                   <Note
                     note={note}
