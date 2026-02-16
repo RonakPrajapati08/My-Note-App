@@ -570,14 +570,13 @@ If it declares any Font Awesome CSS pseudo-elements, they will not be rendered a
   transition-all duration-300
   ${D?"scale-0 opacity-0":""}
   ${s?"w-full h-full p-6 overflow-hidden":"aspect-[2/3] p-3 sm:aspect-auto sm:h-[300px] md:h-[320px] lg:h-[340px] sm:p-4"}
-`,style:{backgroundColor:u.color},children:[P.jsxs("div",{className:"flex flex-col gap-3 flex-1",children:[E?P.jsx("input",{type:"text",value:h,onChange:q=>p(q.target.value),placeholder:"Title...",className:`bg-transparent outline-none\r
-  font-bold\r
+`,style:{backgroundColor:u.color},children:[P.jsxs("div",{className:"flex flex-col gap-3 flex-1",children:[E?P.jsx("input",{type:"text",value:h,onChange:q=>p(q.target.value),placeholder:"Title...",className:`bg-transparent outline-none font-bold\r
   text-sm sm:text-base md:text-lg lg:text-xl\r
   text-gray-700`}):P.jsx("div",{className:`font-bold\r
   text-sm sm:text-base md:text-lg lg:text-xl\r
-  text-gray-700 truncate cursor-pointer`,onClick:()=>c(u),children:h}),E?P.jsx("textarea",{rows:"8",value:y,onChange:q=>g(q.target.value),placeholder:"Write your note here...",className:`resize-none bg-transparent outline-none \r
-             text-gray-700 text-sm \r
-             flex-1 overflow-y-auto`}):P.jsx("div",{className:`text-[10px] leading-[1.1rem] sm:text-xs md:text-sm lg:text-[0.8rem] lg:leading-[1.7rem]\r
+  text-gray-700 truncate cursor-pointer`,onClick:()=>c(u),children:h}),E?P.jsx("textarea",{rows:"7",value:y,onChange:q=>g(q.target.value),placeholder:"Write your note here...",className:`resize-none bg-transparent outline-none \r
+             text-gray-700 text-base \r
+             flex-1 overflow-y-auto custom-scroll`}):P.jsx("div",{className:`text-[10px] leading-[1.1rem] sm:text-xs md:text-sm lg:text-[0.8rem] lg:leading-[1.7rem]\r
            text-gray-700 line-clamp-5 sm:line-clamp-[8] md:line-clamp-[10] lg:line-clamp-[8] \r
            whitespace-pre-wrap cursor-pointer`,onClick:()=>c(u),children:y})]}),P.jsxs("div",{className:"mt-auto flex items-center justify-between pt-3",children:[P.jsx("p",{className:"text-[9px] sm:text-xs font-semibold text-gray-700",children:new Date(u.time).toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}),!s&&P.jsx(qE,{className:`\r
       text-red-500 \r
@@ -593,7 +592,7 @@ If it declares any Font Awesome CSS pseudo-elements, they will not be rendered a
       sm:w-6 sm:h-6 /* tablet */\r
       md:w-7 md:h-7 /* laptop */\r
       lg:w-7 lg:h-7 /* desktop */\r
-    `,onClick:()=>{L(!0),setTimeout(()=>r(u.id),300)}})]}),s&&E&&P.jsx("button",{onClick:Z,className:"absolute bottom-5 right-5 bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-lg transition-transform transform hover:scale-110",children:P.jsx(ir,{icon:XE,className:"text-white w-5 h-5"})})]})}function $0({addNote:u}){const r=()=>`hsl(${Math.floor(Math.random()*360)}, 70%, 90%)`,f=()=>{const c=r();u(c)};return P.jsxs(P.Fragment,{children:[P.jsx("div",{className:"hidden md:flex fixed top-6 left-6 z-50",children:P.jsx("button",{onClick:f,className:`\r
+    `,onClick:()=>{L(!0),setTimeout(()=>r(u.id),300)}}),s&&E&&P.jsx("button",{onClick:Z,className:" bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg shadow-lg transition-transform transform hover:scale-110",children:P.jsx(ir,{icon:XE,className:"text-white w-5 h-5"})})]})]})}function $0({addNote:u}){const r=()=>`hsl(${Math.floor(Math.random()*360)}, 70%, 90%)`,f=()=>{const c=r();u(c)};return P.jsxs(P.Fragment,{children:[P.jsx("div",{className:"hidden md:flex fixed top-6 left-6 z-50",children:P.jsx("button",{onClick:f,className:`\r
             w-14 h-14\r
             rounded-full\r
             bg-gradient-to-br from-indigo-500 to-purple-600\r
