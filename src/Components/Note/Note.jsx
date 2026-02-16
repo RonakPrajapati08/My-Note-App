@@ -40,7 +40,7 @@ function Note({
   return (
     <div
       className={`
-  relative flex flex-col rounded-2xl 
+  relative flex flex-col rounded-2xl border-2 shadow-md hover:shadow-lg
   transition-all duration-300
   ${deleting ? "scale-0 opacity-0" : ""}
   ${
@@ -49,16 +49,21 @@ function Note({
       : "aspect-[2/3] p-3 sm:aspect-auto sm:h-[300px] md:h-[320px] lg:h-[340px] sm:p-4"
   }
 `}
-      style={{ backgroundColor: note.color }}
+      style={{
+        backgroundColor: note.color,
+        borderColor: note.color.replace("90%", "80%"),
+      }}
     >
       {/* TITLE + TEXT */}
-      <div className="flex flex-col gap-3 flex-1">
+      <div
+        className="flex flex-col gap-3 flex-1 cursor-pointer"
+        onClick={() => setSelectedNote(note)}
+      >
         {!isEditing ? (
           <div
             className="font-bold
   text-sm sm:text-base md:text-lg lg:text-xl
   text-gray-700 truncate cursor-pointer"
-            onClick={() => setSelectedNote(note)}
           >
             {title}
           </div>
@@ -79,7 +84,6 @@ function Note({
             className="text-[10px] leading-[1.1rem] sm:text-xs md:text-sm lg:text-[0.8rem] lg:leading-[1.7rem]
            text-gray-700 line-clamp-5 sm:line-clamp-[8] md:line-clamp-[10] lg:line-clamp-[8] 
            whitespace-pre-wrap cursor-pointer"
-            onClick={() => setSelectedNote(note)}
           >
             {text}
           </div>

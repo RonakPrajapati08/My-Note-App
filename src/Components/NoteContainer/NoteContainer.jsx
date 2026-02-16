@@ -22,6 +22,8 @@ function NoteContainer() {
   const [toastMsg, setToastMsg] = useState("");
   const [validationMsg, setValidationMsg] = useState("");
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [newNote, setNewNote] = useState({
     title: "",
@@ -75,6 +77,18 @@ function NoteContainer() {
     setNotes((prevNotes) => [noteToSave, ...prevNotes]);
     setShowModal(false);
     setValidationMsg(""); // reset message
+
+    // 🎉 Confetti Effect
+    confetti({
+      particleCount: 150,
+      spread: 90,
+      origin: { y: 0.6 },
+      colors: ["#4caf50", "#2196f3", "#ff9800", "#e91e63"],
+    });
+
+    // ✅ Success Toast
+    setToastMsg("Note added successfully! 🎉");
+    setShowToast(true);
   };
 
   const updateNote = (id, newTitle, newText) => {
@@ -107,24 +121,48 @@ function NoteContainer() {
     setShowToast(true);
   };
 
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
   const deleteNote = (id) => {
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
   };
 
-  const deleteAllNotes = () => {
+  // const deleteAllNotes = () => {
+  //   setDeletingAll(true);
+  //   setTimeout(() => {
+  //     setNotes([]);
+  //     localStorage.removeItem("notes");
+  //     setDeletingAll(false);
+  //   }, 300);
+  // };
+  const confirmDeleteAll = () => {
     setDeletingAll(true);
+
     setTimeout(() => {
       setNotes([]);
       localStorage.removeItem("notes");
       setDeletingAll(false);
+      setShowDeleteConfirm(false);
+
+      // Optional Success Toast
+      setToastMsg("All notes deleted successfully 🗑️");
+      setShowToast(true);
     }, 300);
   };
 
   return (
-    <div className="w-full min-h-screen px-1 md:px-8 py-6 flex gap-2">
+    <div className="w-full h-screen px-1 md:px-8 py-6 flex gap-2">
       {/* Sidebar */}
       {!selectedNote && (
-        <div className="flex flex-col md:w-10 w-0 h-screen">
+        <div className="flex flex-col md:w-10 w-0">
           <Sidebar addNote={handleAddNoteClick} />
         </div>
       )}
@@ -135,17 +173,30 @@ function NoteContainer() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-bold text-gray-800">All Notes</h2>
 
+            {/* Delete all not with no note add button disable */}
             {!selectedNote && (
               <button
-                onClick={deleteAllNotes}
-                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow transition transform hover:scale-105 duration-200"
+                disabled={notes.length === 0}
+                onClick={() => {
+                  if (notes.length > 0) {
+                    setShowDeleteConfirm(true);
+                  }
+                }}
+                className={`
+                      flex items-center gap-2 px-4 py-2 rounded-lg shadow 
+                      transition transform duration-200
+                      ${
+                        notes.length === 0
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                          : "bg-red-500 hover:bg-red-600 text-white hover:scale-105"
+                      }
+                    `}
               >
                 <FontAwesomeIcon icon={faTrash} className="w-5 h-5" />
                 Delete All
               </button>
             )}
           </div>
-
           {/* Search Bar */}
           <div className="flex justify-center mb-6">
             <div className="relative w-full md:w-2/3 lg:w-1/2">
@@ -165,23 +216,98 @@ function NoteContainer() {
               />
             </div>
           </div>
-
           {/* Toast */}
           {showToast && (
-            <div className="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-xl shadow-xl z-50 animate-bounce">
-              {toastMsg}
+            <div
+              className={` fixed top-6 right-6  bg-green-500 text-white  px-6 py-3  rounded-xl shadow-2xl  z-50 flex items-center gap-4 transform transition-all duration-500 animate-slideIn`}
+            >
+              <span className="text-sm font-medium">{toastMsg}</span>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setShowToast(false)}
+                className="text-white hover:text-gray-200 text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {/* /* Delete All Confirmation Modal */}
+
+          {showDeleteConfirm && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 border border-gray-100 animate-fadeIn">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  Confirm Delete
+                </h3>
+
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to delete all notes? This action cannot
+                  be undone.
+                </p>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={confirmDeleteAll}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition shadow-md"
+                  >
+                    Delete All
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
           {/* Notes Grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredNotes.length === 0 ? (
-              <p className="text-gray-400">No notes added yet</p>
-            ) : (
-              filteredNotes.map((note) => (
+          {filteredNotes.length === 0 ? (
+            <div className="group flex flex-col items-center justify-center p-16 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/40 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300">
+              {/* No Note yet then msg show */}
+              <div className="p-4 bg-white rounded-full shadow-sm border border-slate-100 group-hover:shadow-md transition-shadow">
+                <svg
+                  className="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+
+              <div className="mt-6 text-center">
+                <h3 className="text-lg font-bold text-slate-800 tracking-wide">
+                  No records found
+                </h3>
+                <p className="mt-1 text-sm text-slate-400 font-light">
+                  Your thoughts deserve a home. Tap the action button below to
+                  start documenting.
+                </p>
+              </div>
+
+              {/* Decorative dots to show quality UI detail */}
+              <div className="mt-8 flex items-center gap-1.5">
+                <div className="h-1 w-1 rounded-full bg-slate-300"></div>
+                <div className="h-1 w-1 rounded-full bg-slate-200"></div>
+                <div className="h-1 w-1 rounded-full bg-slate-100"></div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+              {filteredNotes.map((note) => (
                 <div
                   key={note.id}
-                  className={` p-1 ${
+                  className={`p-1 ${
                     recentlyEditedId === note.id ? "animate-pulse" : ""
                   }`}
                 >
@@ -194,9 +320,9 @@ function NoteContainer() {
                     deletingAll={deletingAll}
                   />
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Fullscreen Mode */}
