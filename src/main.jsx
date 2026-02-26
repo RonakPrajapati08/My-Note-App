@@ -9,7 +9,7 @@ registerSW({ immediate: true });
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter basename="/My-Note-App">
+    <BrowserRouter basename="/My-Note-App/">
       <App />
     </BrowserRouter>
   </StrictMode>,
