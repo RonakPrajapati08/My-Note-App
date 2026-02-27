@@ -479,6 +479,16 @@ function NoteContainer() {
     color: "#fff",
   });
 
+  const [animateModal, setAnimateModal] = useState(false);
+
+useEffect(() => {
+  if (selectedNote) {
+    setTimeout(() => setAnimateModal(true), 10);
+  } else {
+    setAnimateModal(false);
+  }
+}, [selectedNote]);
+
   const { userId } = useParams();
 
   // 🔥 Real-time Firebase fetch (USER WISE)
@@ -760,9 +770,10 @@ function NoteContainer() {
             {filteredNotes.map((note) => (
               <div
                 key={note.id}
-                className={`p-1 ${
-                  recentlyEditedId === note.id ? "animate-pulse" : ""
-                }`}
+                // className={`p-1 ${
+                //   recentlyEditedId === note.id ? "animate-pulse" : ""
+                // }`}
+                className="p-1"
               >
                 <Note
                   key={note.id}
@@ -780,24 +791,39 @@ function NoteContainer() {
 
         {/* Fullscreen Edit Popup */}
         {selectedNote && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="relative w-[95%] md:w-[70%] lg:w-[50%] h-[80%]">
-              <Note
-                note={selectedNote}
-                updateNote={updateNote}
-                deleteNote={deleteNote}
-                setSelectedNote={setSelectedNote}
-                isFullScreen={true}
-              />
-              <button
-                onClick={() => setSelectedNote(null)}
-                className="absolute top-4 right-4 bg-white text-red-500 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:scale-110 transition z-50"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
+  <div
+    className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 transition-opacity duration-300 ${
+      animateModal ? "opacity-100" : "opacity-0"
+    }`}
+  >
+    <div className="relative w-[95%] md:w-[70%] lg:w-[50%] h-[80%]">
+      <Note
+        note={selectedNote}
+        updateNote={updateNote}
+        deleteNote={deleteNote}
+        setSelectedNote={setSelectedNote}
+        isFullScreen={true}
+      />
+
+      <button
+        onClick={() => {
+          setAnimateModal(false);
+          setTimeout(() => setSelectedNote(null), 300);
+        }}
+        className={`absolute top-4 right-4 bg-white text-red-500 
+        rounded-full w-10 h-10 flex items-center justify-center shadow-lg 
+        transition-all duration-300 transform
+        ${
+          animateModal
+            ? "scale-100 opacity-100"
+            : "scale-75 opacity-0"
+        }`}
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
       </div>
 
       {/* Add Note Modal (OLD UI SAME) */}
