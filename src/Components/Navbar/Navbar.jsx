@@ -24,79 +24,84 @@ export default function Navbar({
     : "bg-gray-100 text-gray-600 hover:bg-gray-200";
 
   return (
-    <header
-      className={`fixed top-0 right-0 h-16 z-30 flex items-center gap-3 px-4 border-b backdrop-blur-md transition-all duration-300 ${base}`}
-      style={{ left: sidebarCollapsed ? "68px" : "240px" }}
-    >
-      {/* Mobile menu toggle */}
-      <button
-        className={`md:hidden p-2 rounded-lg transition-all ${iconBtn}`}
-        onClick={onMobileMenu}
-        aria-label="Toggle sidebar"
+    <>
+      <header
+        className={`fixed top-0 right-0 h-16 z-30 flex items-center gap-2 px-3 md:px-4 border-b backdrop-blur-md transition-all duration-300 ${base}`}
+        style={{ left: sidebarCollapsed ? "68px" : "240px" }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+        {/* Mobile menu */}
+        <button
+          className={`md:hidden p-2 rounded-lg ${iconBtn}`}
+          onClick={onMobileMenu}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
 
-      {/* Search Bar */}
-      <div className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border text-sm ${inputBase}`}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 shrink-0">
-          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
-        </svg>
-        <input
-          value={search}
-          onChange={(e) => onSearch(e.target.value)}
-          placeholder="Search notes..."
-          className="flex-1 bg-transparent outline-none placeholder-gray-400 text-sm min-w-0"
-        />
-        {search && (
-          <button onClick={() => onSearch("")} className="text-gray-400 hover:text-gray-600">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
+        {/* Search */}
+        <div className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border text-sm ${inputBase}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 shrink-0">
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
+          </svg>
 
-      {/* Sort Dropdown */}
-      <select
-        value={sortBy}
-        onChange={(e) => onSort(e.target.value)}
-        className={`text-xs font-semibold px-3 py-2 rounded-xl border outline-none cursor-pointer transition-all ${btnBase}`}
-      >
-        <option value="date-desc">Newest</option>
-        <option value="date-asc">Oldest</option>
-        <option value="title">Title A–Z</option>
-      </select>
+          <input
+            value={search}
+            onChange={(e) => onSearch(e.target.value)}
+            placeholder="Search..."
+            className="flex-1 bg-transparent outline-none text-sm min-w-0"
+          />
 
-      {/* View Mode Toggle */}
-      <div className={`flex rounded-xl border p-1 ${dark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-gray-50"}`}>
-        {["grid", "list"].map((v) => (
-          <button
-            key={v}
-            onClick={() => onViewMode(v)}
-            className={`p-1.5 rounded-lg transition-all ${
-              viewMode === v
-                ? `shadow-sm text-indigo-600 ${dark ? "bg-gray-700" : "bg-white"}`
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-            title={v === "grid" ? "Grid view" : "List view"}
+          {search && (
+            <button onClick={() => onSearch("")} className="text-gray-400 hover:text-gray-600">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Desktop Controls */}
+        <div className="hidden md:flex items-center gap-3">
+          <select
+            value={sortBy}
+            onChange={(e) => onSort(e.target.value)}
+            className={`text-xs font-semibold px-3 py-2 rounded-xl border outline-none cursor-pointer ${btnBase}`}
           >
-            {v === "grid" ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-        ))}
-      </div>
+            <option value="date-desc">Newest</option>
+            <option value="date-asc">Oldest</option>
+            <option value="title">Title A–Z</option>
+          </select>
 
-      {/* Dark Mode Toggle */}
+          {/* View toggle */}
+          <div className={`flex rounded-xl border p-1 ${dark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-gray-50"}`}>
+            {["grid", "list"].map((v) => (
+              <button
+                key={v}
+                onClick={() => onViewMode(v)}
+                className={`p-1.5 rounded-lg transition-all ${
+                  viewMode === v
+                    ? `shadow-sm text-indigo-600 ${dark ? "bg-gray-700" : "bg-white"}`
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                {v === "grid" ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Icons */}
+        <div className="flex items-center gap-1 md:gap-2">
+           {/* Dark Mode Toggle */}
       <button
         onClick={onDark}
         className={`p-2 rounded-xl transition-all ${iconBtn} ${dark ? "text-amber-400" : ""}`}
@@ -124,16 +129,14 @@ export default function Navbar({
         <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-500 rounded-full" />
       </button>
 
-      {/* User Avatar */}
-      <div
-        className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-xs font-black shadow-lg cursor-pointer shrink-0"
-        title={user?.email}
-      >
-        {user?.email?.[0]?.toUpperCase() || "U"}
-      </div>
+          {/* Avatar */}
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-xs font-black">
+            {user?.email?.[0]?.toUpperCase() || "U"}
+          </div>
+        </div>
 
-      {/* Create Note Button */}
-      <button
+        {/* ✅ New Note Button */}
+        <button
         onClick={onAdd}
         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
       >
@@ -142,6 +145,19 @@ export default function Navbar({
         </svg>
         <span className="hidden sm:inline">New Note</span>
       </button>
-    </header>
+      </header>
+
+      {/* ✅ Floating Button Mobile */}
+      <button
+        onClick={onAdd}
+        className="fixed bottom-6 right-6 md:hidden z-10
+        w-14 h-14 rounded-full bg-indigo-600 text-white 
+        shadow-xl flex items-center justify-center"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <path d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+    </>
   );
 }
