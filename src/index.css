@@ -12,18 +12,18 @@
     transform: scale(1);
   }
 }
-.custom-scroll::-webkit-scrollbar {
+/* .custom-scroll::-webkit-scrollbar {
   width: 6px;
-}
+} */
 
-.custom-scroll::-webkit-scrollbar-thumb {
+/* .custom-scroll::-webkit-scrollbar-thumb {
   background: #0000001f;
   border-radius: 8px;
 }
 
 .custom-scroll::-webkit-scrollbar-track {
   background: transparent;
-}
+} */
 
 @keyframes slideIn {
   from {
@@ -40,7 +40,7 @@
   animation: slideIn 0.4s ease-out forwards;
 }
 
-@keyframes fadeIn {
+/* @keyframes fadeIn {
   from {
     opacity: 0;
     transform: scale(0.95);
@@ -49,8 +49,85 @@
     opacity: 1;
     transform: scale(1);
   }
-}
+} */
 
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* ─── Reset & Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif; */
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 99px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+
+/* ─── Dark mode base ────────────────────────────────────────────────────────── */
+.dark body {
+  background-color: #030712;
+  color: #F9FAFB;
+}
+
+/* ─── Animations ────────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* ─── Keyboard shortcut pill ────────────────────────────────────────────────── */
+kbd {
+  font-family: 'Sora', monospace;
+}
+
+/* ─── Selection color ───────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(99, 102, 241, 0.2);
+  color: inherit;
+}
+
+/* ─── Tailwind border-width 3px fix ────────────────────────────────────────── */
+.border-3 {
+  border-width: 3px;
 }
