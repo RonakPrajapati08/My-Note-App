@@ -498,11 +498,55 @@
 
 // export default App;
 
+// import { Routes, Route, Navigate } from "react-router-dom";
+// import { useEffect, useState } from "react";
+// import { onAuthStateChanged } from "firebase/auth";
+// import { auth } from "./firebase";
+// import Login from "./Components/Auth/Login";
+// import Signup from "./Components/Auth/Signup";
+// import Dashboard from "./Components/Dashboard/Dashboard";
+// import AppLoader from "./Components/UI/AppLoader";
+
+// function App() {
+//   const [user, setUser] = useState(null);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+//       setUser(currentUser);
+//       setLoading(false);
+//     });
+//     return () => unsubscribe();
+//   }, []);
+
+//   if (loading) return <AppLoader />;
+
+//   return (
+//     <Routes>
+//       <Route
+//         path="/"
+//         element={!user ? <Login /> : <Navigate to={`/dashboard/${user.uid}`} />}
+//       />
+//       <Route
+//         path="/signup"
+//         element={!user ? <Signup /> : <Navigate to={`/dashboard/${user.uid}`} />}
+//       />
+//       <Route
+//         path="/dashboard/:userId"
+//         element={user ? <Dashboard user={user} /> : <Navigate to="/" />}
+//       />
+//     </Routes>
+//   );
+// }
+
+// export default App;
 
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
+
 import Login from "./Components/Auth/Login";
 import Signup from "./Components/Auth/Signup";
 import Dashboard from "./Components/Dashboard/Dashboard";
@@ -512,11 +556,54 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 Migration Function
+  const migrateLocalNotesToFirebase = async (userId) => {
+    try {
+      const localNotes = JSON.parse(localStorage.getItem("notes")) || [];
+
+      if (localNotes.length === 0) {
+        console.log("No local notes found");
+        return;
+      }
+
+      console.log("Migrating notes...", localNotes);
+
+      for (let note of localNotes) {
+        await addDoc(collection(db, "notes"), {
+          userId: userId, // 🔐 user link
+          title: note.title || "",
+          text: note.text || "",
+          color: note.color || "#ffffff",
+          tags: note.tags || [],
+          createdAt: note.time ? new Date(note.time) : new Date(),
+        });
+      }
+
+      console.log("✅ Migration Completed");
+
+      // 👉 success pachi clean
+      localStorage.removeItem("notes");
+      localStorage.setItem("migrated", "true");
+    } catch (error) {
+      console.error("❌ Migration Error:", error);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+
+      // 🔥 Migration trigger (only once + only when logged in)
+      if (currentUser) {
+        const alreadyMigrated = localStorage.getItem("migrated");
+
+        if (!alreadyMigrated) {
+          await migrateLocalNotesToFirebase(currentUser.uid);
+        }
+      }
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -530,7 +617,9 @@ function App() {
       />
       <Route
         path="/signup"
-        element={!user ? <Signup /> : <Navigate to={`/dashboard/${user.uid}`} />}
+        element={
+          !user ? <Signup /> : <Navigate to={`/dashboard/${user.uid}`} />
+        }
       />
       <Route
         path="/dashboard/:userId"
