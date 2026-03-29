@@ -569,26 +569,26 @@ function App() {
       console.log("Migrating notes...", localNotes);
 
       for (let note of localNotes) {
-        await addDoc(collection(db, "notes"), {
-          userId: userId, // 🔐 user link
-          title: note.title || "",
-          text: note.text || "",
-          color: note.color || "#ffffff",
-          tags: note.tags || [],
-          createdAt: note.time ? new Date(note.time) : new Date(),
-        });
+        await addDoc(
+          collection(db, "users", userId, "notes"), // ✅ FIXED PATH
+          {
+            title: note.title || "",
+            text: note.text || "",
+            color: note.color || "#ffffff",
+            tags: note.tags || [],
+            createdAt: note.time ? new Date(note.time) : new Date(),
+          },
+        );
       }
 
       console.log("✅ Migration Completed");
 
-      // 👉 success pachi clean
       localStorage.removeItem("notes");
       localStorage.setItem("migrated", "true");
     } catch (error) {
       console.error("❌ Migration Error:", error);
     }
   };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
