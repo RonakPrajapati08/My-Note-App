@@ -224,20 +224,25 @@
 //   );
 // }
 
-
 import { useState, useRef, useEffect } from "react";
+import { collection, getDocs, updateDoc } from "firebase/firestore";
 
-const ALL_TAGS = ["work", "design", "personal", "dev"];
+// const ALL_TAGS = ["work", "design", "personal", "dev"];
 
-const TAG_COLORS = {
-  work:     { bg: "#EEF2FF", text: "#4F46E5", border: "#C7D2FE", hover: "#EEF2FF" },
-  design:   { bg: "#FDF4FF", text: "#9333EA", border: "#E9D5FF", hover: "#FDF4FF" },
-  personal: { bg: "#F0FDF4", text: "#16A34A", border: "#BBF7D0", hover: "#F0FDF4" },
-  dev:      { bg: "#FFF7ED", text: "#EA580C", border: "#FED7AA", hover: "#FFF7ED" },
-};
+const getTagColor = (tag) => {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+  }
 
-const TAG_DOT = {
-  work: "#4F46E5", design: "#9333EA", personal: "#16A34A", dev: "#EA580C",
+  const hue = hash % 360;
+
+  return {
+    bg: `hsla(${hue}, 70%, 90%, 0.6)`, // 👈 soft glass bg
+    border: `hsla(${hue}, 60%, 70%, 0.4)`,
+    text: `hsl(${hue}, 40%, 30%)`,
+    dot: `hsl(${hue}, 60%, 40%)`,
+  };
 };
 
 const COLOR_NAMES = {
@@ -251,19 +256,28 @@ const COLOR_NAMES = {
   "#F0FDFA": "Teal",
 };
 
-export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
-  const [title, setTitle]         = useState(note?.title || "");
-  const [text, setText]           = useState(note?.text  || "");
-  const [color, setColor]         = useState(note?.color || noteColors[0]);
-  const [tags, setTags]           = useState(note?.tags  || []);
-  const [error, setError]         = useState("");
-  const [visible, setVisible]     = useState(false);
-  const [tagOpen, setTagOpen]     = useState(false);
+export default function NoteModal({
+  note,
+  noteColors,
+  onSave,
+  onClose,
+  dark,
+  ALL_TAGS = [],
+}) {
+  const [title, setTitle] = useState(note?.title || "");
+  const [text, setText] = useState(note?.text || "");
+  const [color, setColor] = useState(note?.color || noteColors[0]);
+  const [tags, setTags] = useState(note?.tags || []);
+  const [error, setError] = useState("");
+  const [visible, setVisible] = useState(false);
+  const [tagOpen, setTagOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
 
-  const titleRef  = useRef(null);
-  const tagRef    = useRef(null);
-  const colorRef  = useRef(null);
+  const [oldTags, setOldTags] = useState([]);
+
+  const titleRef = useRef(null);
+  const tagRef = useRef(null);
+  const colorRef = useRef(null);
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -274,8 +288,10 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handler = (e) => {
-      if (tagRef.current && !tagRef.current.contains(e.target)) setTagOpen(false);
-      if (colorRef.current && !colorRef.current.contains(e.target)) setColorOpen(false);
+      if (tagRef.current && !tagRef.current.contains(e.target))
+        setTagOpen(false);
+      if (colorRef.current && !colorRef.current.contains(e.target))
+        setColorOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -288,7 +304,7 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
 
   const toggleTag = (t) =>
     setTags((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
     );
 
   const handleSave = () => {
@@ -296,29 +312,42 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
       setError("Please add a title or some content.");
       return;
     }
-    onSave({ title: title.trim(), text: text.trim(), color, tags });
+
+    onSave({
+      title: title.trim(),
+      text: text.trim(),
+      color,
+      tags,
+    });
+    
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Escape") {
-      if (tagOpen)   { setTagOpen(false);   return; }
-      if (colorOpen) { setColorOpen(false); return; }
+      if (tagOpen) {
+        setTagOpen(false);
+        return;
+      }
+      if (colorOpen) {
+        setColorOpen(false);
+        return;
+      }
       handleClose();
     }
     if (e.key === "Enter" && e.ctrlKey) handleSave();
   };
 
   // ── theme tokens ────────────────────────────────────────────────────────────
-  const overlayBg   = dark ? "rgba(0,0,0,0.75)" : "rgba(15,23,42,0.6)";
-  const modalBg     = dark ? "#111827" : "#ffffff";
+  const overlayBg = dark ? "rgba(0,0,0,0.75)" : "rgba(15,23,42,0.6)";
+  const modalBg = dark ? "#111827" : "#ffffff";
   const borderColor = dark ? "#1F2937" : "#F1F5F9";
-  const textColor   = dark ? "#F9FAFB" : "#0F172A";
-  const subText     = dark ? "#9CA3AF" : "#6B7280";
-  const dropBg      = dark ? "#1E293B" : "#ffffff";
-  const dropBorder  = dark ? "#334155" : "#E5E7EB";
-  const rowHover    = dark ? "#0F172A" : "#F8FAFF";
+  const textColor = dark ? "#F9FAFB" : "#0F172A";
+  const subText = dark ? "#9CA3AF" : "#6B7280";
+  const dropBg = dark ? "#1E293B" : "#ffffff";
+  const dropBorder = dark ? "#334155" : "#E5E7EB";
+  const rowHover = dark ? "#0F172A" : "#F8FAFF";
   const inputBorder = dark ? "#374151" : "#E5E7EB";
-  const inputBg     = dark ? "#1E293B" : "#F8FAFF";
+  const inputBg = dark ? "#1E293B" : "#F8FAFF";
 
   // ── shared dropdown trigger style ───────────────────────────────────────────
   const triggerCls = `w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium cursor-pointer transition-all duration-200 hover:border-indigo-400 focus:outline-none`;
@@ -340,8 +369,11 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
         style={{
           background: modalBg,
           border: `1px solid ${borderColor}`,
-          transform: visible ? "scale(1) translateY(0)" : "scale(0.96) translateY(20px)",
-          transition: "transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.25s ease",
+          transform: visible
+            ? "scale(1) translateY(0)"
+            : "scale(0.96) translateY(20px)",
+          transition:
+            "transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.25s ease",
           opacity: visible ? 1 : 0,
           maxHeight: "90vh",
           display: "flex",
@@ -350,7 +382,6 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
         }}
         className="w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden"
       >
-
         {/* ══ HEADER with Color Accent ═══════════════════════════════════════ */}
         <div
           style={{
@@ -364,8 +395,15 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 5v14M5 12h14" stroke="white"/>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M12 5v14M5 12h14" stroke="white" />
                 </svg>
               </div>
               <span
@@ -379,9 +417,16 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
               onClick={handleClose}
               className="p-2 rounded-lg text-gray-400 hover:text-gray-600 transition-all hover:bg-black/10 backdrop-blur-sm"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -390,7 +435,10 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
           <input
             ref={titleRef}
             value={title}
-            onChange={(e) => { setTitle(e.target.value); setError(""); }}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setError("");
+            }}
             placeholder="Untitled Note"
             style={{
               background: "transparent",
@@ -413,11 +461,18 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
           {/* Enhanced Textarea Section */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: subText }}>
+              <label
+                className="text-[11px] font-bold uppercase tracking-wider"
+                style={{ color: subText }}
+              >
                 Content
               </label>
-              <span className="text-[10px] font-mono" style={{ color: subText }}>
-                {text.length} chars · {text.split(/\s+/).filter(Boolean).length} words
+              <span
+                className="text-[10px] font-mono"
+                style={{ color: subText }}
+              >
+                {text.length} chars · {text.split(/\s+/).filter(Boolean).length}{" "}
+                words
               </span>
             </div>
             <div
@@ -433,7 +488,10 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
               <textarea
                 ref={textareaRef}
                 value={text}
-                onChange={(e) => { setText(e.target.value); setError(""); }}
+                onChange={(e) => {
+                  setText(e.target.value);
+                  setError("");
+                }}
                 placeholder="Write your thoughts here..."
                 rows={13}
                 style={{
@@ -456,14 +514,22 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
           {error && (
             <div
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium animate-shake"
-              style={{ 
-                background: dark ? "rgba(239,68,68,0.12)" : "#FEF2F2", 
+              style={{
+                background: dark ? "rgba(239,68,68,0.12)" : "#FEF2F2",
                 border: `1px solid ${dark ? "#7F1A1A" : "#FECACA"}`,
-                color: dark ? "#FCA5A5" : "#DC2626"
+                color: dark ? "#FCA5A5" : "#DC2626",
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {error}
@@ -472,22 +538,29 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
 
           {/* ── Two dropdowns side by side ──────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
-
             {/* ── TAG DROPDOWN with Better UI ─────────────────────────────────── */}
             <div ref={tagRef} className="relative">
-              <label className="text-[11px] font-bold uppercase tracking-wider mb-2 block" style={{ color: subText }}>
+              <label
+                className="text-[11px] font-bold uppercase tracking-wider mb-2 block"
+                style={{ color: subText }}
+              >
                 Tags
               </label>
 
               {/* Trigger */}
               <button
-                onClick={() => { setTagOpen((o) => !o); setColorOpen(false); }}
+                onClick={() => {
+                  setTagOpen((o) => !o);
+                  setColorOpen(false);
+                }}
                 className={triggerCls}
                 style={{
                   background: inputBg,
                   border: `1.5px solid ${tagOpen ? "#6366F1" : inputBorder}`,
                   color: textColor,
-                  boxShadow: tagOpen ? "0 0 0 3px rgba(99,102,241,0.1)" : "none",
+                  boxShadow: tagOpen
+                    ? "0 0 0 3px rgba(99,102,241,0.1)"
+                    : "none",
                 }}
               >
                 <span className="flex items-center gap-2 flex-wrap min-w-0">
@@ -495,16 +568,30 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                     <span style={{ color: subText }}>No tags selected</span>
                   ) : (
                     tags.map((t) => {
-                      const c = TAG_COLORS[t];
+                      // const c = TAG_COLORS[t];
+                      const c = getTagColor(t);
+                      // const c = TAG_COLORS[t] || {
+                      //   bg: "#F1F5F9",
+                      //   text: "#334155",
+                      //   border: "#E2E8F0",
+                      // };
                       return (
                         <span
                           key={t}
-                          style={{ backgroundColor: c.bg, color: c.text, border: `1px solid ${c.border}` }}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold backdrop-blur-md"
+                          style={{
+                            background: c.bg,
+                            border: `1px solid ${c.border}`,
+                            color: c.text,
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                          }}
                         >
                           <span
                             className="w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: TAG_DOT[t] }}
+                            style={{
+                              backgroundColor: c.dot,
+                              boxShadow: "0 0 4px rgba(0,0,0,0.15)",
+                            }}
                           />
                           {t}
                         </span>
@@ -513,9 +600,14 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                   )}
                 </span>
                 <svg
-                  width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2"
-                  strokeLinecap="round" strokeLinejoin="round"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   style={{
                     transform: tagOpen ? "rotate(180deg)" : "rotate(0deg)",
                     transition: "transform 0.2s ease",
@@ -541,7 +633,13 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                   className="absolute left-0 right-0"
                 >
                   {ALL_TAGS.map((t, i) => {
-                    const c    = TAG_COLORS[t];
+                    // const c = TAG_COLORS(t);
+                    const c = getTagColor(t);
+                    // const c = TAG_COLORS[t?.toLowerCase()] || {
+                    //   bg: "#F1F5F9",
+                    //   text: "#334155",
+                    //   border: "#E2E8F0",
+                    // };
                     const isOn = tags.includes(t);
                     return (
                       <button
@@ -553,7 +651,11 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                           alignItems: "center",
                           justifyContent: "space-between",
                           padding: "12px 16px",
-                          background: isOn ? (dark ? "#1E293B" : "#F5F7FF") : "transparent",
+                          background: isOn
+                            ? dark
+                              ? "#1E293B"
+                              : "#F5F7FF"
+                            : "transparent",
                           borderTop: i > 0 ? `1px solid ${dropBorder}` : "none",
                           cursor: "pointer",
                           transition: "all 0.15s",
@@ -563,12 +665,17 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center"
-                            style={{ backgroundColor: c.bg }}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center backdrop-blur-md"
+                            style={{
+                              background: c.bg,
+                              border: `1px solid ${c.border}`,
+                            }}
                           >
                             <span
                               className="w-2 h-2 rounded-full"
-                              style={{ backgroundColor: TAG_DOT[t] }}
+                              style={{
+                                backgroundColor: c.dot,
+                              }}
                             />
                           </div>
                           <span
@@ -579,9 +686,16 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                           </span>
                         </div>
                         {isOn && (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="#6366F1" strokeWidth="2.5"
-                            strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#6366F1"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path d="M5 13l4 4L19 7" />
                           </svg>
                         )}
@@ -594,34 +708,53 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
 
             {/* ── COLOR DROPDOWN with Better UI ───────────────────────────────── */}
             <div ref={colorRef} className="relative">
-              <label className="text-[11px] font-bold uppercase tracking-wider mb-2 block" style={{ color: subText }}>
+              <label
+                className="text-[11px] font-bold uppercase tracking-wider mb-2 block"
+                style={{ color: subText }}
+              >
                 Card Color
               </label>
 
               {/* Trigger */}
               <button
-                onClick={() => { setColorOpen((o) => !o); setTagOpen(false); }}
+                onClick={() => {
+                  setColorOpen((o) => !o);
+                  setTagOpen(false);
+                }}
                 className={triggerCls}
                 style={{
                   background: inputBg,
                   border: `1.5px solid ${colorOpen ? "#6366F1" : inputBorder}`,
                   color: textColor,
-                  boxShadow: colorOpen ? "0 0 0 3px rgba(99,102,241,0.1)" : "none",
+                  boxShadow: colorOpen
+                    ? "0 0 0 3px rgba(99,102,241,0.1)"
+                    : "none",
                 }}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-6 h-6 rounded-lg shadow-sm"
-                    style={{ backgroundColor: color, border: `1px solid ${dark ? "#334155" : "#E2E8F0"}` }}
+                    style={{
+                      backgroundColor: color,
+                      border: `1px solid ${dark ? "#334155" : "#E2E8F0"}`,
+                    }}
                   />
-                  <span className="text-sm font-semibold" style={{ color: textColor }}>
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: textColor }}
+                  >
                     {COLOR_NAMES[color] || "Custom"}
                   </span>
                 </div>
                 <svg
-                  width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2"
-                  strokeLinecap="round" strokeLinejoin="round"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   style={{
                     transform: colorOpen ? "rotate(180deg)" : "rotate(0deg)",
                     transition: "transform 0.2s ease",
@@ -651,13 +784,20 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                       return (
                         <button
                           key={c}
-                          onClick={() => { setColor(c); setColorOpen(false); }}
+                          onClick={() => {
+                            setColor(c);
+                            setColorOpen(false);
+                          }}
                           style={{
                             display: "flex",
                             alignItems: "center",
                             gap: "10px",
                             padding: "10px 12px",
-                            background: isOn ? (dark ? "#1E293B" : "#F5F7FF") : "transparent",
+                            background: isOn
+                              ? dark
+                                ? "#1E293B"
+                                : "#F5F7FF"
+                              : "transparent",
                             borderRadius: "10px",
                             cursor: "pointer",
                             transition: "all 0.15s",
@@ -666,14 +806,26 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
                         >
                           <div
                             className="w-8 h-8 rounded-lg shadow-sm"
-                            style={{ backgroundColor: c, border: `1px solid ${dark ? "#334155" : "#E2E8F0"}` }}
+                            style={{
+                              backgroundColor: c,
+                              border: `1px solid ${dark ? "#334155" : "#E2E8F0"}`,
+                            }}
                           />
-                          <span className="text-sm font-medium flex-1 text-left" style={{ color: textColor }}>
+                          <span
+                            className="text-sm font-medium flex-1 text-left"
+                            style={{ color: textColor }}
+                          >
                             {COLOR_NAMES[c] || c}
                           </span>
                           {isOn && (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                              stroke="#6366F1" strokeWidth="2.5">
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="#6366F1"
+                              strokeWidth="2.5"
+                            >
                               <path d="M5 13l4 4L19 7" />
                             </svg>
                           )}
@@ -721,7 +873,10 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
 
           {/* Keyboard hints */}
           <div className="flex items-center gap-4 pt-3 pb-1">
-            <p className="text-[11px] flex items-center gap-2" style={{ color: subText }}>
+            <p
+              className="text-[11px] flex items-center gap-2"
+              style={{ color: subText }}
+            >
               <kbd
                 className="px-2 py-0.5 rounded-md text-[10px] font-mono"
                 style={{
@@ -745,7 +900,10 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
               </kbd>
               <span>Save</span>
             </p>
-            <p className="text-[11px] flex items-center gap-2" style={{ color: subText }}>
+            <p
+              className="text-[11px] flex items-center gap-2"
+              style={{ color: subText }}
+            >
               <kbd
                 className="px-2 py-0.5 rounded-md text-[10px] font-mono"
                 style={{
@@ -785,15 +943,21 @@ export default function NoteModal({ note, noteColors, onSave, onClose, dark }) {
             onClick={handleSave}
             className="px-7 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 shadow-lg shadow-indigo-500/25"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5"
-              strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M5 13l4 4L19 7" />
             </svg>
             {note?.id ? "Save Changes" : "Create Note"}
           </button>
         </div>
-
       </div>
     </div>
   );
