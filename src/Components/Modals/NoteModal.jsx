@@ -302,9 +302,11 @@ export default function NoteModal({
     setTimeout(onClose, 200);
   };
 
-  const toggleTag = (t) =>
+  const toggleTag = (tagName) =>
     setTags((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+      prev.includes(tagName)
+        ? prev.filter((x) => x !== tagName)
+        : [...prev, tagName],
     );
 
   const handleSave = () => {
@@ -319,7 +321,6 @@ export default function NoteModal({
       color,
       tags,
     });
-    
   };
 
   const handleKeyDown = (e) => {
@@ -568,32 +569,25 @@ export default function NoteModal({
                     <span style={{ color: subText }}>No tags selected</span>
                   ) : (
                     tags.map((t) => {
-                      // const c = TAG_COLORS[t];
-                      const c = getTagColor(t);
-                      // const c = TAG_COLORS[t] || {
-                      //   bg: "#F1F5F9",
-                      //   text: "#334155",
-                      //   border: "#E2E8F0",
-                      // };
+                      const tagName = typeof t === "object" ? t.name : t;
+
+                      const c = getTagColor(tagName);
+
                       return (
                         <span
-                          key={t}
+                          key={tagName} // ✅ FIXED
                           className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold backdrop-blur-md"
                           style={{
                             background: c.bg,
                             border: `1px solid ${c.border}`,
                             color: c.text,
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                           }}
                         >
                           <span
                             className="w-1.5 h-1.5 rounded-full"
-                            style={{
-                              backgroundColor: c.dot,
-                              boxShadow: "0 0 4px rgba(0,0,0,0.15)",
-                            }}
+                            style={{ backgroundColor: c.dot }}
                           />
-                          {t}
+                          {tagName} {/* ✅ FIXED */}
                         </span>
                       );
                     })
@@ -633,18 +627,18 @@ export default function NoteModal({
                   className="absolute left-0 right-0"
                 >
                   {ALL_TAGS.map((t, i) => {
-                    // const c = TAG_COLORS(t);
-                    const c = getTagColor(t);
-                    // const c = TAG_COLORS[t?.toLowerCase()] || {
-                    //   bg: "#F1F5F9",
-                    //   text: "#334155",
-                    //   border: "#E2E8F0",
-                    // };
-                    const isOn = tags.includes(t);
+                    const tagName = typeof t === "object" ? t.name : t;
+
+                    const c = getTagColor(tagName);
+                    const isOn = tags.some(
+                      (tag) =>
+                        (typeof tag === "object" ? tag.name : tag) === tagName,
+                    );
+
                     return (
                       <button
-                        key={t}
-                        onClick={() => toggleTag(t)}
+                        key={tagName} // ✅ FIXED
+                        onClick={() => toggleTag(tagName)}
                         style={{
                           width: "100%",
                           display: "flex",
@@ -682,7 +676,7 @@ export default function NoteModal({
                             className="text-sm font-semibold capitalize"
                             style={{ color: textColor }}
                           >
-                            {t}
+                            {tagName}
                           </span>
                         </div>
                         {isOn && (
@@ -765,6 +759,7 @@ export default function NoteModal({
               </button>
 
               {/* Dropdown panel with color grid */}
+              {/* Dropdown panel with color grid */}
               {colorOpen && (
                 <div
                   style={{
@@ -779,13 +774,15 @@ export default function NoteModal({
                   className="absolute left-0 right-0"
                 >
                   <div className="p-3 grid grid-cols-2 gap-2">
-                    {noteColors.map((c) => {
-                      const isOn = color === c;
+                    {noteColors.map((clr) => {
+                      // 🔥 renamed from c → clr
+                      const isOn = color === clr;
+
                       return (
                         <button
-                          key={c}
+                          key={clr}
                           onClick={() => {
-                            setColor(c);
+                            setColor(clr);
                             setColorOpen(false);
                           }}
                           style={{
@@ -807,7 +804,7 @@ export default function NoteModal({
                           <div
                             className="w-8 h-8 rounded-lg shadow-sm"
                             style={{
-                              backgroundColor: c,
+                              backgroundColor: clr, // ✅ FIX
                               border: `1px solid ${dark ? "#334155" : "#E2E8F0"}`,
                             }}
                           />
@@ -815,8 +812,9 @@ export default function NoteModal({
                             className="text-sm font-medium flex-1 text-left"
                             style={{ color: textColor }}
                           >
-                            {COLOR_NAMES[c] || c}
+                            {COLOR_NAMES[clr] || clr}
                           </span>
+
                           {isOn && (
                             <svg
                               width="14"

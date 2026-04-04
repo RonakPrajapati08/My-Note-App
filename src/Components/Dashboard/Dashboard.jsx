@@ -478,6 +478,7 @@ export default function Dashboard({ user }) {
   const [tagModalOpen, setTagModalOpen] = useState(false);
 
   const [ALL_TAGS, setAllTags] = useState([]);
+  const [tagColors, setTagColors] = useState({});
 
   const PER_PAGE = 9;
 
@@ -485,6 +486,31 @@ export default function Dashboard({ user }) {
     localStorage.setItem("nf-dark", dark);
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
+
+  const generateTagColor = () => {
+  const hue = Math.floor(Math.random() * 360);
+  return {
+    bg: `hsl(${hue}, 70%, 92%)`,
+    text: `hsl(${hue}, 60%, 35%)`,
+    dot: `hsl(${hue}, 70%, 50%)`,
+  };
+};
+
+useEffect(() => {
+  if (!ALL_TAGS || ALL_TAGS.length === 0) return;
+
+  setTagColors((prev) => {
+    const updated = { ...prev };
+
+    ALL_TAGS.forEach((tag) => {
+      if (!updated[tag]) {
+        updated[tag] = generateTagColor();
+      }
+    });
+
+    return updated;
+  });
+}, [ALL_TAGS]);
 
   const syncNotesWithTags = async (updatedTags) => {
   if (!user) return;
@@ -723,6 +749,7 @@ export default function Dashboard({ user }) {
           user={user}
           onLogout={handleLogout}
           ALL_TAGS={ALL_TAGS}
+          TAG_COLORS={tagColors}
         />
 
         <Navbar

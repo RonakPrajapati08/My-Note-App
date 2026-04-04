@@ -457,56 +457,61 @@ export default function Sidebar({
           <>
             <div className="mt-6 mb-2 px-3">
               <p
-                className={`text-[10px] font-semibold tracking-wide uppercase ${dark ? "text-gray-500" : "text-gray-400"}`}
+                className={`text-[10px] font-semibold tracking-wider uppercase ${
+                  dark ? "text-gray-500" : "text-gray-400"
+                }`}
               >
                 Tags
               </p>
             </div>
 
-            {ALL_TAGS.map((tag) => {
-              const isActive = activeTag === tag;
+            {ALL_TAGS.map((tagObj) => {
+              // 🔥 HANDLE BOTH OLD + NEW FORMAT
+              const isString = typeof tagObj === "string";
+
+              const name = isString ? tagObj : tagObj.name;
+
+              const color = isString
+                ? {
+                    bg: "#f3f4f6",
+                    text: "#374151",
+                    dot: "#9ca3af",
+                  }
+                : tagObj.color;
+
+              const isActive = activeTag === name;
 
               return (
                 <button
-                  key={tag}
-                  onClick={() => onTag(isActive ? null : tag)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg mb-1 transition-all duration-200 group
-        ${
-          isActive
-            ? dark
-              ? "bg-indigo-500/10 text-indigo-400"
-              : "bg-indigo-50 text-indigo-600"
-            : dark
-              ? "hover:bg-gray-800/60 text-gray-400"
-              : "hover:bg-gray-50 text-gray-600"
-        }`}
+                  key={name} // ✅ FIXED (no duplicate key)
+                  onClick={() => onTag(isActive ? null : name)}
+                  className={`
+        w-full flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1
+        transition-all duration-200
+        ${isActive ? "shadow-sm" : "hover:translate-x-[2px]"}
+      `}
+                  style={{
+                    backgroundColor: isActive ? color.bg : "transparent",
+                  }}
                 >
-                  {/* LEFT */}
-                  <div className="flex items-center gap-2">
-                    {/* Dot */}
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        isActive
-                          ? "bg-indigo-500"
-                          : dark
-                            ? "bg-gray-600 group-hover:bg-indigo-400"
-                            : "bg-gray-400 group-hover:bg-indigo-500"
-                      }`}
-                    />
-
-                    {/* Tag Name */}
-                    <span className="text-sm font-medium">
-                      {tag}
-                    </span>
-                  </div>
-
-                  {/* RIGHT HOVER ICON */}
+                  {/* 🔵 Dot */}
                   <span
-                    className={`text-[10px] opacity-0 group-hover:opacity-100 transition ${
-                      isActive ? "text-indigo-500" : "text-gray-400"
-                    }`}
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: color?.dot }}
+                  />
+
+                  {/* 🏷 Name */}
+                  <span
+                    className="text-sm font-medium truncate"
+                    style={{
+                      color: isActive
+                        ? color?.text
+                        : dark
+                          ? "#9CA3AF"
+                          : "#4B5563",
+                    }}
                   >
-                    #
+                    {name} {/* ✅ FIXED (no object render) */}
                   </span>
                 </button>
               );

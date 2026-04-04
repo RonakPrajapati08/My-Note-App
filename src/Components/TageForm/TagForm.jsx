@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { doc, onSnapshot, setDoc, collection, getDocs, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  onSnapshot,
+  setDoc,
+  collection,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 
 export default function TagForm({ user, onClose }) {
@@ -23,18 +30,35 @@ export default function TagForm({ user, onClose }) {
     return () => unsub();
   }, [user]);
 
+  //radom color generator
+  const generateTagColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    return {
+      bg: `hsl(${hue}, 70%, 92%)`,
+      text: `hsl(${hue}, 60%, 35%)`,
+      dot: `hsl(${hue}, 70%, 50%)`,
+    };
+  };
+
   // ✅ ADD TAG
   const handleAddTag = () => {
     const tag = inputTag.trim();
     if (!tag || tags.includes(tag)) return;
 
-    setTags([...tags, tag]);
+    // setTags([...tags, { tag, color: generateTagColor() }]);
+    setTags([
+      ...tags,
+      {
+        name: tag, // ✅ FIX
+        color: generateTagColor(),
+      },
+    ]);
     setInputTag("");
   };
 
   // ✅ REMOVE TAG
   const handleRemoveTag = (tag) => {
-    setTags(tags.filter((t) => t !== tag));
+    setTags(tags.filter((t) => t.name !== tag));
   };
 
   // 🔥 SAVE TAGS TO FIRESTORE
@@ -66,7 +90,10 @@ export default function TagForm({ user, onClose }) {
         if (!note.tags || note.tags.length === 0) return;
 
         // 👉 keep only valid tags
-        const cleanedTags = note.tags.filter((t) => tags.includes(t));
+        // const cleanedTags = note.tags.filter((t) => tags.includes(t));
+        const tagNames = tags.map((t) => t.name);
+
+        const cleanedTags = note.tags.filter((t) => tagNames.includes(t));
 
         if (cleanedTags.length !== note.tags.length) {
           return updateDoc(docSnap.ref, {
@@ -107,15 +134,36 @@ export default function TagForm({ user, onClose }) {
           </label>
 
           <div className="flex flex-wrap gap-2 mb-3">
-            {tags.map((tag, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm flex items-center gap-2"
-              >
-                {tag}
-                <button onClick={() => handleRemoveTag(tag)}>✕</button>
-              </span>
-            ))}
+            {tags.map((tagObj, i) => {
+              const color = tagObj?.color || {
+                bg: "#f3f4f6",
+                text: "#374151",
+                dot: "#9ca3af",
+              };
+
+              return (
+                <span
+                  key={i}
+                  className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                  style={{
+                    backgroundColor: color.bg,
+                    color: color.text,
+                  }}
+                >
+                  {/* Dot */}
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: color.dot }}
+                  />
+                  {tagObj.name || tagObj} {/* ✅ fallback for old data */}
+                  <button
+                    onClick={() => handleRemoveTag(tagObj.name || tagObj)}
+                  >
+                    ✕
+                  </button>
+                </span>
+              );
+            })}
           </div>
 
           {/* INPUT */}
