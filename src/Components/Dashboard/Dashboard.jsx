@@ -480,6 +480,9 @@ export default function Dashboard({ user }) {
   const [ALL_TAGS, setAllTags] = useState([]);
   const [tagColors, setTagColors] = useState({});
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
   const PER_PAGE = 9;
 
   useEffect(() => {
@@ -488,60 +491,74 @@ export default function Dashboard({ user }) {
   }, [dark]);
 
   const generateTagColor = () => {
-  const hue = Math.floor(Math.random() * 360);
-  return {
-    bg: `hsl(${hue}, 70%, 92%)`,
-    text: `hsl(${hue}, 60%, 35%)`,
-    dot: `hsl(${hue}, 70%, 50%)`,
+    const hue = Math.floor(Math.random() * 360);
+    return {
+      bg: `hsl(${hue}, 70%, 92%)`,
+      text: `hsl(${hue}, 60%, 35%)`,
+      dot: `hsl(${hue}, 70%, 50%)`,
+    };
   };
-};
 
-useEffect(() => {
-  if (!ALL_TAGS || ALL_TAGS.length === 0) return;
+  useEffect(() => {
+    if (!ALL_TAGS || ALL_TAGS.length === 0) return;
 
-  setTagColors((prev) => {
-    const updated = { ...prev };
+    setTagColors((prev) => {
+      const updated = { ...prev };
 
-    ALL_TAGS.forEach((tag) => {
-      if (!updated[tag]) {
-        updated[tag] = generateTagColor();
-      }
+      ALL_TAGS.forEach((tag) => {
+        if (!updated[tag]) {
+          updated[tag] = generateTagColor();
+        }
+      });
+
+      return updated;
     });
+  }, [ALL_TAGS]);
 
-    return updated;
-  });
-}, [ALL_TAGS]);
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+
+      // 👉 mobile ma default mini sidebar
+      if (mobile) {
+        setSidebarCollapsed(true);
+      }
+    };
+
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const syncNotesWithTags = async (updatedTags) => {
-  if (!user) return;
+    if (!user) return;
 
-  try {
-    const ref = collection(db, "users", user.uid, "notes");
-    const snap = await getDocs(ref);
+    try {
+      const ref = collection(db, "users", user.uid, "notes");
+      const snap = await getDocs(ref);
 
-    const updates = snap.docs.map(async (docSnap) => {
-      const note = docSnap.data();
+      const updates = snap.docs.map(async (docSnap) => {
+        const note = docSnap.data();
 
-      if (!note.tags || note.tags.length === 0) return;
+        if (!note.tags || note.tags.length === 0) return;
 
-      // 🔥 keep only valid tags
-      const cleanedTags = note.tags.filter((t) =>
-        updatedTags.includes(t)
-      );
+        // 🔥 keep only valid tags
+        const cleanedTags = note.tags.filter((t) => updatedTags.includes(t));
 
-      // update only if changed
-      if (cleanedTags.length !== note.tags.length) {
-        return updateDoc(docSnap.ref, {
-          tags: cleanedTags,
-        });
-      }
-    });
+        // update only if changed
+        if (cleanedTags.length !== note.tags.length) {
+          return updateDoc(docSnap.ref, {
+            tags: cleanedTags,
+          });
+        }
+      });
 
-    await Promise.all(updates);
-  } catch (err) {
-    console.error("Sync error:", err);
-  }
-};
+      await Promise.all(updates);
+    } catch (err) {
+      console.error("Sync error:", err);
+    }
+  };
 
   // ✅ FIX 1: No orderBy() — avoids Firestore composite index error
   // ✅ FIX 2: onError callback — loading always stops, never hangs
@@ -737,20 +754,39 @@ useEffect(() => {
           onSection={(s) => {
             setSection(s);
             setPage(1);
+            setMobileSidebarOpen(false); // close on click
           }}
           collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed((c) => !c)}
+          onToggle={() => {
+            if (isMobile) {
+              setMobileSidebarOpen((p) => !p); // ✅ toggle open/close
+            } else {
+              setSidebarCollapsed((c) => !c);
+            }
+          }}
           activeTag={activeTag}
           onTag={(t) => {
             setActiveTag(t);
             setPage(1);
+            setMobileSidebarOpen(false);
           }}
           dark={dark}
           user={user}
           onLogout={handleLogout}
           ALL_TAGS={ALL_TAGS}
           TAG_COLORS={tagColors}
+          isMobile={isMobile}
+          mobileOpen={mobileSidebarOpen}
+          onAddNote={() => setNoteModal({ note: null })}
+          onOpenTagForm={() => setTagModalOpen(true)}
         />
+
+        {isMobile && mobileSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-30"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
 
         <Navbar
           search={search}
@@ -766,14 +802,28 @@ useEffect(() => {
           dark={dark}
           onDark={() => setDark((d) => !d)}
           sidebarCollapsed={sidebarCollapsed}
-          onMobileMenu={() => setSidebarCollapsed((c) => !c)}
+          // onMobileMenu={() => setSidebarCollapsed((c) => !c)}
+          onMobileMenu={() => {
+            if (isMobile) {
+              setMobileSidebarOpen(true);
+            } else {
+              setSidebarCollapsed((c) => !c);
+            }
+          }}
           onOpenTagForm={() => setTagModalOpen(true)}
           user={user}
         />
 
         <main
           className="transition-all duration-300 pt-16"
-          style={{ marginLeft: sidebarCollapsed ? "68px" : "240px" }}
+          // style={{ marginLeft: sidebarCollapsed ? "68px" : "240px" }}
+          style={{
+            marginLeft: isMobile
+              ? "68px" // 👉 mini sidebar space
+              : sidebarCollapsed
+                ? "68px"
+                : "240px",
+          }}
         >
           <div className="p-6 md:p-8">
             <div className="flex items-center justify-between mb-6">
@@ -842,7 +892,11 @@ useEffect(() => {
 
         {tagModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <TagForm user={user} onClose={() => setTagModalOpen(false)} onSyncNotes={syncNotesWithTags} />
+            <TagForm
+              user={user}
+              onClose={() => setTagModalOpen(false)}
+              onSyncNotes={syncNotesWithTags}
+            />
           </div>
         )}
 

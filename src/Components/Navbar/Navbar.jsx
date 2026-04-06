@@ -31,14 +31,14 @@ export default function Navbar({
         style={{ left: sidebarCollapsed ? "68px" : "240px" }}
       >
         {/* Mobile menu */}
-        <button
+        {/* <button
           className={`md:hidden p-2 rounded-lg ${iconBtn}`}
           onClick={onMobileMenu}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-        </button>
+        </button> */}
 
         {/* Search */}
         <div className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border text-sm ${inputBase}`}>
@@ -131,12 +131,13 @@ export default function Navbar({
       </button>
 
           {/* Avatar */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-xs font-black">
+          {/* <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-xs font-black">
             {user?.email?.[0]?.toUpperCase() || "U"}
-          </div>
+          </div> */}
         </div>
 
         {/* ✅ New Note Button */}
+        <div className="hidden lg:flex items-center gap-2">
         <button
         onClick={onAdd}
         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
@@ -157,6 +158,8 @@ export default function Navbar({
   </svg>
   <span className="hidden sm:inline">Manage Tags</span>
 </button>
+
+</div>
       
       </header>
 
