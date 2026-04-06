@@ -121,7 +121,7 @@ export default function Navbar({
 
       {/* Notification Bell */}
       <button
-        className={`p-2 rounded-xl transition-all relative ${iconBtn}`}
+        className={`p-2 hidden md:flex rounded-xl transition-all relative ${iconBtn}`}
         title="Notifications"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
